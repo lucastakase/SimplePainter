@@ -5,103 +5,85 @@ import org.academiadecodigo.simplegraphics.graphics.Rectangle;
 import java.io.IOException;
 
 public class Painter {
-    private Rectangle painter;
-    private Grid grid;
-    public Painter(){
+    private Rectangle painter; //Represents the painter (a rectangle) on the screen
+    private Grid grid; //Reference to the grid object
+    private int col; //Current column position of the painter on the grid
+    private int row; //Current row position of the painter on the grid
+    private int gridMaxX; //Maximum number of columns in the grid
+    private int gridMaxY; //Maximum number of rows in the grid
+
+    public Painter(int col, int row, Grid grids) { //Constructor, initializes the painter with initial position and grid reference
+        this.col = col;
+        this.row = row;
+        grid = grids;
+        gridMaxX = grid.getNumbCellX();
+        gridMaxY = grid.getNumbCellY();
+
+        painter = new Rectangle(Grid.colToX(col), Grid.rowToY(row), Grid.CELLSIZE, Grid.CELLSIZE);
+        painter.setColor(Color.RED); //Sets the painter color to red
+        painter.fill(); //Fills the painter rectangle
     }
 
-    private int painterSize;
-    private int gridMaxX;
-    private int gridMaxY;
-    private int numbCell;
-
-    public int[] grelha;
-
-
-    public void setPainterSize(int painterSize){
-        this.painterSize = painterSize;
-    }
-    public void setGridMaxX(int gridMaxX){
-        this.gridMaxX = gridMaxX;
-    }
-    public void setGridMaxY(int gridMaxY){
-        this.gridMaxY = gridMaxY;
-    }
-    public void setNumbCell(int numbCell){
-        this.numbCell = numbCell;
-    }
-    public void createPainter(Grid grid){
-        setGridMaxX(grid.getNumbCellX() * grid.getCellSize());
-        setGridMaxY(grid.getNumbCellY() * grid.getCellSize());
-        setPainterSize(grid.getCellSize());
-        setNumbCell(grid.getNumbCellX());
-        painter = new Rectangle(0, 0, painterSize, painterSize);
-        painter.setColor(Color.CYAN);
-        painter.fill();
-        grelha = new int[(gridMaxX/painterSize) * (gridMaxY/painterSize)];
-
-    }
-
-
-    public void moveLeft(){
-        if(painter.getX() > 0) {
-            painter.translate(-painterSize, 0);
+    public void moveLeft() { //Moves the painter one cell to the left
+        if (painter.getX() > Grid.PADDING) { //Checks if the painter is not at the leftmost edge
+            painter.translate(-Grid.CELLSIZE, 0); //Moves the painter left by one cell size
+            col--; //Updates the painter's column position
         }
     }
-    public void moveRight(){
-        if(painter.getX() < gridMaxX - painterSize ) {
-            painter.translate(painterSize, 0);
+
+    public void moveRight() { //Moves the painter one cell to the right
+        if (painter.getX() < Grid.colToX(gridMaxX) - Grid.CELLSIZE) { //Checks if the painter is not at the rightmost edge
+            painter.translate(Grid.CELLSIZE, 0); //Moves the painter right by one cell size
+            col++; //Updates the painter's column position
         }
     }
-    public void moveUp(){
-        if(painter.getY() > 0) {
-            painter.translate(0, -painterSize);
+
+    public void moveUp() { //Moves the painter one cell up
+        if (painter.getY() > Grid.PADDING) { //Checks if the painter is not at the top edge
+            painter.translate(0, -Grid.CELLSIZE); //Moves the painter up by one cell size
+            row--; //Updates the painter's row position
         }
     }
-    public void moveDown(){
-        if(painter.getY() < gridMaxY - painterSize) {
-            painter.translate(0, painterSize);
+
+    public void moveDown() { //Moves the painter one cell down
+        if (painter.getY() < Grid.rowToY(gridMaxY) - Grid.CELLSIZE) { //Checks if the painter is not at the bottom edge
+            painter.translate(0, Grid.CELLSIZE); //Moves the painter down by one cell size
+            row++; //Updates the painter's row position
         }
     }
-    public void paintBlack(){
-        Rectangle black = new Rectangle(painter.getX(), painter.getY(), painterSize, painterSize);
-        black.fill();
-        black.setColor(Color.BLACK);
-        grelha[((painter.getY()*numbCell)/painterSize)+(painter.getX()/painterSize)] = 1;
 
-
+    public void paintBlack() { //Paints the current cell black
+        Cells cell = grid.getCell(col, row); //Gets the cell at the current painter position
+        cell.paintBlack(); //Paints the cell black
     }
-    public void erase(){
-        grelha[((painter.getY()*numbCell)/painterSize)+(painter.getX()/painterSize)] = 0;
+
+    public void erase() { //Erases the current cell
+        Cells cells = grid.getCell(col, row); //Gets the cell at the current painter position
+        cells.erase(); //Erases the cell
     }
-    public void paintBlue(){
-        Rectangle black = new Rectangle(painter.getX(), painter.getY(), painterSize, painterSize);
-        black.fill();
-        black.setColor(Color.BLUE);
-        grelha[((painter.getY()*numbCell)/painterSize)+(painter.getX()/painterSize)] = 2;
+
+    public void paintBlue() { //Paints the current cell blue
+        Cells cell = grid.getCell(col, row); //Gets the cell at the current painter position
+        cell.paintBlue(); //Paints the cell blue
     }
-    public void save() throws IOException {
-        grid = new Grid(numbCell, numbCell);
-        grid.writeFileByLine("grelha.txt", grelha);
-       for(int g : grelha){
-           System.out.println(g);
 
-                //if(j == getNumbCellY() - 1){
-                //    result += 0 + "\n"
-                //}else {
-                //    result += 0 + " ";
-                //}
-
-
+    public void save() { //Saves the current state of the grid to a file
+        try {
+            grid.saveGrid();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-    //    painter.
-    }
-    public void load(){
-      //  painter.
-    }
-    public void clear(){
-
     }
 
+    public void load() { //Loads a saved grid state from a file
+        try {
+            grid.loadGrid();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    public void clear() { //Clears the entire grid (erases all cells)
+        grid.clear();
+    }
 }
