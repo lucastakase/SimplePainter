@@ -33,6 +33,13 @@ This Java program implements a basic painting application where users can draw o
 - **`MyKeyboardHandler.java`:** Defines a `MyKeyboardHandler` class for handling keyboard events.
 
 ---
+## Pictures
+
+![Blank](simplepainter2.png)
+![Draw](simplepainter.png)
+
+
+---
 
 ## Possible Enhancements
 
